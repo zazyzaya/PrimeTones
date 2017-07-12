@@ -5,6 +5,6 @@ Creates audio by plotting the difference between the approximate linear slope of
 It then multiplies the difference by a sine wave to produce a synth like tone.
 
 # TODO
-Using the wav library make it output audio instead of a graph
-Allow the user to input their own linear approximations for different tones
+Using the wav library make it output audio instead of a graph  
+Allow the user to input their own linear approximations for different tones  
 Some sort of MIDI intigration to hear the tones in context

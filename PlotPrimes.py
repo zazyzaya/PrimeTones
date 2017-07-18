@@ -6,6 +6,8 @@ import math
 from itertools import count, islice
 import matplotlib.pyplot as plt
 from random import choice, randint
+import wave
+import struct
 
 def isPrime(n):
     return n > 1 and all(n%i for i in islice(count(2), int(math.sqrt(n)-1)))
@@ -44,11 +46,23 @@ def linearize(points, start=0, end=1000000):
 
     index = 1
     for s in points:
-
-        audioArray.append((m*index - s)*math.sin(index)/44100)
+                            # Mess with the math here for different tones
+        audioArray.append((math.sin(index / (m*index - s)) * s)/1000)  # +/- 32769 is the max/min level for a wav file
         index += 1
 
     return audioArray
+
+def writeToAudio(audioLevels, fname="output3.wav"):
+    audioOutput = wave.open(fname, 'w')
+    audioOutput.setparams((2, 2, 44100, 0, 'NONE', 'not compressed'))
+    values = []
+
+    for value in audioLevels:
+        packedValue = struct.pack('h', int(value))
+        audioOutput.writeframes(packedValue)  
+        audioOutput.writeframes(packedValue)  # Twice because mono audio (for now)
+
+    audioOutput.close()
 
 def main():
     with open("primeNums.txt", "r") as f:
@@ -59,8 +73,8 @@ def main():
     primes = []
     for p in str_primes:
         primes.append(int(p))
-
-# Have first 1e7 prime numbers in db already, no need for more
+    
+#    Have first 1e7 prime numbers in db already, no need for more
 #
 #    print("Generating List of Primes...")
 #    plotPoints = generatePrimes(380000, primes[-1] + 1, primes)
@@ -75,9 +89,11 @@ def main():
 #            else:
 #                f.write('\n' + str(p))
 
-    print(str(primes[0:10]))
     transform = linearize(primes, randint(0, 620450/2), randint(620452/2, 620450))
-    plt.plot(list(range(len(transform))), transform)
+
+    writeToAudio(transform[86000:])
+
+    plt.plot(list(range(len(transform))), transform, '.')
     plt.show()
 
 main()
